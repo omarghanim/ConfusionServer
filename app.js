@@ -12,6 +12,14 @@ var dishRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
 
+const mongoose =require("mongoose");
+const Dishes=require("./models/dishes");
+const url = "mongodb://localhost:27017/conFusion";
+const connect = mongoose.connect(url,{ useNewUrlParser: true , useUnifiedTopology: true});
+
+connect.then((db)=>{
+  console.log("Connected correctly to server");
+},(err)=>{console.log(err); });
 
 var app = express();
 
@@ -49,5 +57,7 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.render('error');
 });
+
+app.listen(3000);
 
 module.exports = app;
