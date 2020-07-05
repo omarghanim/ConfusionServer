@@ -1,51 +1,83 @@
 
 const express = require("express");
 const bodyParser = require("body-parser");
-
+const Leaders = require("../models/leaders");
 const leaderRouter = express.Router();
 leaderRouter.use(bodyParser.json());
 
 leaderRouter.route("/")
-.all(function(req,res,next){
-  res.statusCode = 200 ;
-  res.setHeader("Content-Type","text/html")
-  next();
+.get(function(req,res,next){
+  Leaders.find({})
+  .then((leads)=>{
+      res.statusCode=200;
+      res.setHeader("Content-Type","application/json")
+      res.json(leads);
+  },(err)=>next(err))
+  .catch((err)=>next(err));
 })
-.get(function(req,res){
-    res.end('Will send all the leaders to you!');
+.post(function(req,res,next){
+Leaders.create(req.body)
+.then((lead)=>{
+    console.log(" Leader Created", lead);
+    res.statusCode=200;
+    res.setHeader("Content-Type","application/json")
+    res.json(lead);
+},(err)=>next(err))
+.catch((err)=>next(err));
 })
-.post(function(req,res){
-  res.end('Will add the leader: ' + req.body.name + ' with details: ' + req.body.description);
 
-})
-.put(function(req,res){
+.put(function(req,res,next){
   res.statusCode = 403 ;
   res.end('PUT operation not supported on /leaders');
 })
 .delete(function(req,res){
-res.end("Deleting all leaders");
+  Leaders.remove({})
+  .then((resp)=>{
+    res.statusCode=200;
+    res.setHeader("Content-Type","application/json")
+    res.json(resp)
+  },(err)=>next(err))
+  .catch((err)=>next(err));
 });
 
-//leaderId
+//leadId
 
-leaderRouter.route("/:leaderId")
+leaderRouter.route("/:leadId")
 .get((req,res,next) => {
-    res.end('Will send details of the leader: ' + req.params.leaderId +' to you!');
+  Leaders.findById(req.params.leadId)
+  .then((lead)=>{
+    res.statusCode=200;
+    res.setHeader("Content-Type","application/json");
+    res.json(lead);
+  },(err)=>next(err))
+  .catch((err)=>next(err));
 })
+
+
 
 .post((req, res, next) => {
   res.statusCode = 403;
-  res.end('POST operation not supported on /leaders/'+ req.params.leaderId);
+  res.end('POST operation not supported on /leaders/'+ req.params.leadId)
 })
 
 .put((req, res, next) => {
-  res.write('Updating the leader:' + req.params.leaderId + '\n');
-  res.end('Will update the leader: ' + req.body.name +
-        ' with details: ' + req.body.description);
+  Leaders.findByIdAndUpdate(req.params.leadId, {$set : req.body},{new:true})
+  .then((lead)=>{
+    res.statusCode=200;
+    res.setHeader("Content-Type","application/json")
+    res.json(lead)
+  },(err)=>next(err))
+  .catch((err)=>next(err));
 })
 
 .delete((req, res, next) => {
-    res.end('Deleting leader: ' + req.params.leaderId);
+  Leaders.findByIdAndRemove(req.params.leadId)
+  .then((respo)=>{
+    res.statusCode=200;
+    res.setHeader("Content-Type","application/json")
+    res.json(respo)
+  },(err)=>next(err))
+  .catch((err)=>next(err));
 });
 
 module.exports=leaderRouter;
