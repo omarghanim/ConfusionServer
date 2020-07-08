@@ -53,8 +53,6 @@ promoRouter.route("/:promoId")
   .catch((err)=>next(err));
 })
 
-
-
 .post((req, res, next) => {
   res.statusCode = 403;
   res.end('POST operation not supported on /promotions/'+ req.params.promoId)
