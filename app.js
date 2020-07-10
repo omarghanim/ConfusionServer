@@ -36,11 +36,13 @@ app.set('view engine', 'jade');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(cookieParser("12345-67890-09876-54321"));
 
 //authorization
 function auth(req,res,next){
-  console.log(req.headers);
+  console.log(req.signedCookies);
+
+  if(!req.signedCookies.user){
   var authHeader = req.headers.authorization;
   if(!authHeader){
     var err = new Error("You are not Authenticated!")
@@ -53,6 +55,7 @@ function auth(req,res,next){
     var user = auth[0];
     var pass = auth[1];
     if(user === "admin" && pass==="password"){
+      res.cookie("user","admin" , {singed:true})
       next();// authorized
     }else{
       var err = new Error("You are not Authenticated!")
@@ -61,6 +64,17 @@ function auth(req,res,next){
       err.status=401;
       return next(err);
     }
+}else{
+  if(req.singedCookies.user === "admin" ){
+    next();
+  }else{
+    var err = new Error("You are not Authenticated!")
+
+    res.setHeader("WWW-Authenticate","Basic");
+    err.status=401;
+    return next(err);
+  }
+}
 }
 
 app.use(auth);
