@@ -5,6 +5,8 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require("express-session");
 var fileStore = require("session-file-store")(session);
+var passport = require("passport");
+var authenticate = require("./authenticate");
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
@@ -13,6 +15,8 @@ var usersRouter = require('./routes/users');
 var dishRouter = require('./routes/dishRouter');
 var promoRouter = require('./routes/promoRouter');
 var leaderRouter = require('./routes/leaderRouter');
+
+var app = express();
 
 const mongoose =require("mongoose");
 const Dishes=require("./models/dishes");
@@ -23,7 +27,6 @@ connect.then((db)=>{
   console.log("Connected correctly to server");
 },(err)=>{console.log(err); });
 
-var app = express();
 
 
 // view engine setup
@@ -42,6 +45,9 @@ app.use(session({
   store:new fileStore()
 }));
 
+app.use(passport.initialize());
+app.use(passport.session());
+
 
 app.use('/users', usersRouter);
 app.use('/', indexRouter);
@@ -50,19 +56,13 @@ app.use('/', indexRouter);
 function auth(req,res,next){
   console.log(req.session);
 
-if(!req.session.user){
+if(!req.user){                            //req.user instead of req.session.user "this from passportlocal"
   var authHeader = req.headers.authorization;
     var err = new Error("You are not Authenticated!")
     err.status=403;
     return next(err);
   }else{
-    if(req.session.user === "authenticated" ){
-    next();
-    }else{
-    var err = new Error("You are not Authenticated!")
-    err.status=403;
-    return next(err);
-  }
+        next();
 }
 }
 
