@@ -6,6 +6,15 @@ var passportLocalMongoose = require("passport-local-mongoose");
 // by the passport-local-mongoose plugin here
 //and to use it in our schema user.plugin(...) and it hashed the password and salt and add additional methods in schema
 var userSchema = new Schema({
+  firstname : {
+    type:String,
+    default : ''
+  },
+  lastname : {
+    type:String,
+    default : ''
+  },
+
   admin:{
     type:Boolean,
     default:false
