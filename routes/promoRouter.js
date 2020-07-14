@@ -3,6 +3,7 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const Promotions = require("../models/promotions");
 const promoRouter = express.Router();
+var authenticate = require('../authenticate');
 promoRouter.use(bodyParser.json());
 
 promoRouter.route("/")
@@ -15,7 +16,7 @@ promoRouter.route("/")
   },(err)=>next(err))
   .catch((err)=>next(err));
 })
-.post(function(req,res,next){
+.post(authenticate.verifyUser,function(req,res,next){
 Promotions.create(req.body)
 .then((promo)=>{
     console.log(" Promotion Created", promo);
@@ -26,11 +27,11 @@ Promotions.create(req.body)
 .catch((err)=>next(err));
 })
 
-.put(function(req,res,next){
+.put(authenticate.verifyUser,function(req,res,next){
   res.statusCode = 403 ;
   res.end('PUT operation not supported on /promotions');
 })
-.delete(function(req,res){
+.delete(authenticate.verifyUser,function(req,res,next){
   Promotions.remove({})
   .then((resp)=>{
     res.statusCode=200;
@@ -43,7 +44,7 @@ Promotions.create(req.body)
 //promoId
 
 promoRouter.route("/:promoId")
-.get((req,res,next) => {
+.get(authenticate.verifyUser,(req,res,next) => {
   Promotions.findById(req.params.promoId)
   .then((promo)=>{
     res.statusCode=200;
@@ -53,12 +54,12 @@ promoRouter.route("/:promoId")
   .catch((err)=>next(err));
 })
 
-.post((req, res, next) => {
+.post(authenticate.verifyUser,(req, res, next) => {
   res.statusCode = 403;
   res.end('POST operation not supported on /promotions/'+ req.params.promoId)
 })
 
-.put((req, res, next) => {
+.put(authenticate.verifyUser,(req, res, next) => {
   Promotions.findByIdAndUpdate(req.params.promoId, {$set : req.body},{new:true})
   .then((dish)=>{
     res.statusCode=200;
@@ -68,7 +69,7 @@ promoRouter.route("/:promoId")
   .catch((err)=>next(err));
 })
 
-.delete((req, res, next) => {
+.delete(authenticate.verifyUser,(req, res, next) => {
   Promotions.findByIdAndRemove(req.params.promoId)
   .then((respo)=>{
     res.statusCode=200;
