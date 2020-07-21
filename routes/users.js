@@ -3,11 +3,12 @@ const bodyParser = require("body-parser");
 var User = require("../models/user");
 var router = express.Router();
 var passport = require("passport");
+const cors = require("./cors");
 
 var authenticate = require('../authenticate');
 
 /* GET users listing. */
-router.get('/',authenticate.verifyUser,authenticate.verifyAdmin, (req, res, next) => {
+router.get('/',cors.corsWithOptions,authenticate.verifyUser,authenticate.verifyAdmin, (req, res, next) => {
 	User.find({})
 		.then((users) => {
 			res.statusCode = 200
@@ -19,7 +20,7 @@ router.get('/',authenticate.verifyUser,authenticate.verifyAdmin, (req, res, next
 
 router.use(bodyParser.json());
 
-router.post("/signup",(req,res,next)=>{                    //passportLocalMongoose plugin supplies useful metrics for us
+router.post("/signup",cors.corsWithOptions,(req,res,next)=>{                    //passportLocalMongoose plugin supplies useful metrics for us
   User.register(new User({username: req.body.username})    //to use in sing up and login process =>method call "Register"and"login" instead of ex:find
     ,req.body.password,(err,user)=>{                       //  register(new User{},password)      //delete .then((user))and exhange by (err,user)
     if(err){
@@ -49,7 +50,7 @@ router.post("/signup",(req,res,next)=>{                    //passportLocalMongoo
   });
 });
 
-router.post("/login",passport.authenticate("local"),(req,res)=>{
+router.post("/login",cors.corsWithOptions,passport.authenticate("local"),(req,res)=>{
   var token = authenticate.getToken({_id: req.user._id});
   res.statusCode=200;
   res.setHeader("Content-Type","application/json")
@@ -57,7 +58,7 @@ router.post("/login",passport.authenticate("local"),(req,res)=>{
 });
 
 
-router.get('/logout', (req, res) => {
+router.get('/logout',cors.corsWithOptions, (req, res) => {
 	if (req.session) {
 		req.session.destroy();
 		res.clearCookie('session-id');
@@ -69,7 +70,7 @@ router.get('/logout', (req, res) => {
 	}
 });
 
-router.delete('/', (req, res, next) => {
+router.delete('/', cors.corsWithOptions,(req, res, next) => {
 	User.remove({})
 		.then(
 			(resp) => {
