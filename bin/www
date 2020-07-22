@@ -4,6 +4,8 @@
  * Module dependencies.
  */
 var app = require('../app');
+var express = require('express');
+var app= express();
 var debug = require('debug')('confusionserver:server');
 var http = require('http');
 var https = require('https');
